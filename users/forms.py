@@ -1,84 +1,80 @@
-import logging
+from django import forms
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
-from django.contrib.auth import authenticate, login, logout
-from django.shortcuts import redirect, render
-from django.views.generic import View
-
-from .forms import LoginForm, RegisterForm
-
-logger = logging.getLogger(__name__)
+from .models import Librarian
 
 
-class LoginView(View):
-    """
-    Login view
-    get(): Returns the login page with the login form
-    post(): Authenticates the user and logs them in
-    """
+class LoginForm(forms.Form):
+    email = forms.CharField(
+        widget=forms.EmailInput(attrs={"class": "form-control form-control-lg", "placeholder": "Enter Email"}),
+    )
 
-    def get(self, request, *args, **kwargs):
-        form = LoginForm()
-        return render(request, "users/login.html", {"form": form})
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={"class": "form-control form-control-lg", "placeholder": "Enter Password"}),
+    )
 
-    def post(self, request, *args, **kwargs):
-        form = LoginForm(request.POST)
+    class Meta:
+        fields = ("email", "password")
 
-        if form.is_valid():
-            email = form.cleaned_data.get("email")
-            password = form.cleaned_data.get("password")
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
 
-            user = authenticate(request, email=email, password=password)
-
-            if user is not None:
-                login(request, user)
-                logger.info(f"User {user.email} logged in")
-                redirect_url = request.GET.get("next", "home")
-
-                return redirect(redirect_url)
-            logger.warning(f"Invalid login attempt for {email}")
-            form.add_error(None, "Invalid email or password")
-
-        logger.warning(f"Invalid login attempt: {form.errors}")
-
-        return render(request, "users/login.html", {"form": form})
+        if not Librarian.objects.filter(email=email).exists():
+            raise ValidationError(_("User with that email does not exist"))
+        
+        return email
 
 
-class RegisterView(View):
-    """
-    Register view
-    get(): Returns the register page with the register form
-    post(): Registers the user
-    """
+class RegisterForm(forms.ModelForm):
+    first_name = forms.CharField(
+        widget=forms.TextInput(attrs={"class": "form-control form-control-lg", "placeholder": "Enter First Name"}),
+    )
 
-    def get(self, request, *args, **kwargs):
-        form = RegisterForm()
-        return render(request, "users/register.html", {"form": form})
+    last_name = forms.CharField(
+        widget=forms.TextInput(attrs={"class": "form-control form-control-lg", "placeholder": "Enter Last Name"}),
+    )
 
-    def post(self, request, *args, **kwargs):
-        form = RegisterForm(request.POST)
+    email = forms.CharField(
+        widget=forms.EmailInput(attrs={"class": "form-control form-control-lg", "placeholder": "Enter Email"}),
+    )
 
-        if form.is_valid():
-            user = form.save(commit=False)
-            password = form.cleaned_data.get("password")
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={"class": "form-control form-control-lg", "placeholder": "Enter Password"}),
+    )
 
-            user.set_password(password)
-            user.save()
+    repeat_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={"class": "form-control form-control-lg", "placeholder": "Repeat Password"}),
+    )
 
-            logger.info(f"User {user.email} registered")
+    class Meta:
+        model = Librarian
+        fields = ["first_name", "last_name", "email", "password", "repeat_password"]
 
-            return redirect("login")
-        logger.warning(f"Invalid registration attempt: {form.errors}")
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
 
-        return render(request, "users/register.html", {"form": form})
+        if Librarian.objects.filter(email=email).exists():
+            raise ValidationError(_("Email already exists"))
 
+        return email
 
-class LogoutView(View):
-    """
-    Logout view
-    get(): Logs the user out
-    """
+    def clean_password(self):
+        password = self.cleaned_data.get("password")
 
-    def get(self, request, *args, **kwargs):
-        logout(request)
-        logger.info("User logged out")
-        return redirect("login")
+        try:
+            validate_password(password)
+        except ValidationError as e:
+            raise forms.ValidationError(e.messages)
+
+        return password
+
+    def clean_repeat_password(self):
+        password = self.cleaned_data.get("password")
+        repeat_password = self.cleaned_data.get("repeat_password")
+
+        if password != repeat_password:
+            raise ValidationError(_("Passwords do not match"))
+
+        return repeat_password
