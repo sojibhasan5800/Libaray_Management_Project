@@ -121,3 +121,26 @@ class LendMemberBookForm(forms.ModelForm):
     class Meta:
         model = BorrowedBook
         fields = ["book", "return_date", "fine"]
+
+
+class UpdateBorrowedBookForm(forms.ModelForm):
+    return_date = forms.DateField(
+        widget=forms.DateInput(attrs={"class": "form-control form-control-lg", "type": "date", "id": "return-date"})
+    )
+
+    fine = forms.DecimalField(
+        widget=forms.NumberInput(attrs={"class": "form-control form-control-lg", "placeholder": "Enter Fine"})
+    )
+
+    class Meta:
+        model = BorrowedBook
+        fields = ["return_date", "fine"]
+
+
+class PaymentForm(forms.Form):
+    payment_method = forms.ChoiceField(
+        choices=PAYMENT_METHOD_CHOICES, widget=forms.Select(attrs={"class": "form-control form-control-lg"})
+    )
+
+    class Meta:
+        fields = ["payment_method"]
