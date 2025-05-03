@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic import View
 
+logger = logging.getLogger(__name__)
 from .forms import (
     AddBookForm,
     AddMemberForm,
@@ -58,5 +59,92 @@ class HomeView(View):
         }
 
         return render(request, "index.html", context)
+    
+
+@method_decorator(login_required, name="dispatch")
+class AddMemberView(View):
+    """
+    Add Member view for the library management system.
+    get(): Returns the add member page with the AddMemberForm.
+    post(): Validates the form and saves the new member to the database.
+    """
+
+    def get(self, request, *args, **kwargs):
+        form = AddMemberForm()
+        return render(request, "members/add-member.html", {"form": form})
+
+    def post(self, request, *args, **kwargs):
+        form = AddMemberForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            logger.info("New member added successfully.")
+            return redirect("members")
+
+        logger.error(f"Error occurred while adding member: {form.errors}")
+
+        return render(request, "members/add-member.html", {"form": form})
+    
+
+
+@method_decorator(login_required, name="dispatch")
+class MembersListView(View):
+    """
+    Members List view for the library management system.
+    get(): Returns the list of members in the library.
+    post(): Returns the list of members in the library based on the search query.
+    """
+
+    def get(self, request, *args, **kwargs):
+        members = Member.objects.all()
+        return render(request, "members/list-members.html", {"members": members})
+
+    def post(self, request, *args, **kwargs):
+        query = request.POST.get("query")
+        members = Member.objects.filter(name__icontains=query)
+        return render(request, "members/list-members.html", {"members": members})
+
+
+@method_decorator(login_required, name="dispatch")
+class UpdateMemberDetailsView(View):
+    """
+    Update Member details view for the library management system.
+    get(): Returns the update member page with the UpdateMemberForm.
+    post(): Validates the form and updates the member details in the database.
+    """
+
+    def get(self, request, *args, **kwargs):
+        member = Member.objects.get(pk=kwargs["pk"])
+        form = UpdateMemberForm(instance=member)
+        return render(request, "members/update-member.html", {"form": form, "member": member})
+
+    def post(self, request, *args, **kwargs):
+        member = Member.objects.get(pk=kwargs["pk"])
+        form = UpdateMemberForm(request.POST, instance=member)
+
+        if form.is_valid():
+            form.save()
+            logger.info("Member details updated successfully.")
+            return redirect("members")
+
+        logger.error(f"Error occurred while updating member: {form.errors}")
+
+        return render(request, "members/update-member.html", {"form": form, "member": member})
+
+
+@method_decorator(login_required, name="dispatch")
+class DeleteMemberView(View):
+    """
+    Delete Member view for the library management system.
+    get(): Deletes the member from the database.
+    """
+
+    def get(self, request, *args, **kwargs):
+        member = Member.objects.get(pk=kwargs["pk"])
+        member.delete()
+        logger.info("Member deleted successfully.")
+        return redirect("members")
+
+
 
 
