@@ -6,24 +6,20 @@
         <div class="card">
             <div class="card-header">
                 <div class="col-5">
-                  <h5 class="card-title mt-4">MEMBERS LIST</h5>
+                  <h5 class="card-title mt-4">PAYMENTS LIST</h5>
                 </div>
                 <div class="row">
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <a href="{% url 'add-member' %}" class="btn btn-primary">Add Member</a>
-                        </div>
-                    </div>
-                    <div class="col-md-5">
+                    <div class="col-md-8">
                         <form method="POST">
                             {% csrf_token %}
                             <div class="input-group">
-                                <input type="text" class="form-control form-control-lg" placeholder="Search Member" name="query">
+                                <input type="text" class="form-control form-control-lg" placeholder="Search Payment" name="query">
                                 <button class="btn btn-primary" type="submit">Search</button>
                             </div>
                         </form>
                     </div>
                 </div>
+
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -31,27 +27,21 @@
                     <thead>
                     <tr>
                         <th>Index</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Amount Due</th>
+                        <th>Paid By</th>
+                        <th>Payment Method</th>
+                        <th>Amount</th>
                         <th colspan="3">Actions</th>
                     </tr>
                     </thead>
                     <tbody>
-                        {% for member in members %}
+                        {% for payment in payments %}
                             <tr>
                                 <td>{{ forloop.counter }}</td>
-                                <td>{{ member.name }}</td>
-                                <td>{{ member.email }}</td>
-                                <td>{{ member.calculate_amount_due }}</td>
+                                <td>{{ payment.member.name }}</td>
+                                <td>{{ payment.payment_method }}</td>
+                                <td>{{ payment.amount }}</td>
                                 <td>
-                                    <a href="{% url 'lend-member-book' member.pk %}" class="btn btn-success">Lend Book</a>
-                                </td>
-                                <td>
-                                    <a href="{% url 'update-member' member.pk %}" class="btn btn-primary">Edit</a>
-                                </td>
-                                <td>
-                                    <a href="{% url 'delete-member' member.pk %}" class="btn btn-danger">Remove</a>
+                                    <a href="{% url 'delete-payment' payment.pk %}" class="btn btn-danger">Remove</a>
                                 </td>
                             </tr>
                         {% endfor %}
