@@ -1,5 +1,6 @@
 {% load static %}
 {% load humanize %}
+{% load tz %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -101,10 +102,9 @@
       </a>
       <div class="collapse" id="ui-basic">
         <ul class="nav flex-column sub-menu">
-          {% comment %} <li class="nav-item"> <a class="nav-link" href="{% url 'add-member' %}">Add Member</a></li>
-          <li class="nav-item"> <a class="nav-link" href="{% url 'members' %}">View Members</a></li> {% endcomment %}
-          <li class="nav-item"> <a class="nav-link" href="">Add Member</a></li>
-          <li class="nav-item"> <a class="nav-link" href="">View Members</a></li>
+          <li class="nav-item"> <a class="nav-link" href="{% url 'add-member' %}">Add Member</a></li>
+          <li class="nav-item"> <a class="nav-link" href="{% url 'members' %}">View Members</a></li> 
+          
         </ul>
       </div>
     </li>
@@ -163,7 +163,7 @@
         <footer class="footer">
           <div class="d-sm-flex justify-content-center justify-content-sm-between">
             <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Library Management System.</span>
-            <span class="float-none float-sm-end d-block mt-1 mt-sm-0 text-center">Copyright © 2024. All rights reserved.</span>
+            <span class="float-none float-sm-end d-block mt-1 mt-sm-0 text-center">Copyright © {% now "Y" %}. All rights reserved.</span>
           </div>
         </footer>
         <!-- partial -->

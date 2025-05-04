@@ -16,6 +16,7 @@ from .forms import (
     UpdateMemberForm,
 )
 from .models import Book, BorrowedBook, Member, Transaction
+from .time_processors import greeting
 # Create your views here.
 
 @method_decorator(login_required, name="dispatch")
@@ -57,6 +58,7 @@ class HomeView(View):
             "total_amount": total_amount,
             "overdue_amount": overdue_amount,
         }
+        context.update(greeting(request))
 
         return render(request, "index.html", context)
     
