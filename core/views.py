@@ -59,8 +59,7 @@ class HomeView(View):
             "total_amount": total_amount,
             "overdue_amount": overdue_amount,
         }
-        context.update(greeting(request))
-
+        
         return render(request, "index.html", context)
     
 
