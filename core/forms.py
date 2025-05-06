@@ -72,7 +72,7 @@ class AddBookForm(forms.ModelForm):
 
 
 class LendBookForm(forms.ModelForm):
-    book = forms.ModelChoiceField(
+    book = forms.MultipleChoiceField(
         label="Book / Books",
         queryset=Book.objects.filter(quantity__gt=0),
         empty_label=None,
@@ -91,13 +91,20 @@ class LendBookForm(forms.ModelForm):
         widget=forms.DateInput(attrs={"class": "form-control form-control-lg", "type": "date", "id": "return-date"})
     )
 
+    borrowing_fee = forms.DecimalField(
+        required=False,
+        widget=forms.NumberInput(attrs={"class": "form-control form-control-lg", "readonly": "readonly"})
+    )
+
+
     fine = forms.DecimalField(
         widget=forms.NumberInput(attrs={"class": "form-control form-control-lg", "placeholder": "Enter Fine"})
     )
+    
 
     class Meta:
         model = BorrowedBook
-        fields = ["book", "member", "return_date", "fine"]
+        fields = ["book", "member", "return_date", "fine","borrowing_fee"]
 
 
 
@@ -118,9 +125,16 @@ class LendMemberBookForm(forms.ModelForm):
         widget=forms.NumberInput(attrs={"class": "form-control form-control-lg", "placeholder": "Enter Fine"})
     )
 
+    borrowing_fee = forms.DecimalField(
+        required=False,
+        widget=forms.NumberInput(attrs={"class": "form-control form-control-lg", "readonly": "readonly"})
+    )
+
+
     class Meta:
         model = BorrowedBook
-        fields = ["book", "return_date", "fine"]
+        fields = ["book", "return_date", "fine", "borrowing_fee"]
+
 
 
 class UpdateBorrowedBookForm(forms.ModelForm):

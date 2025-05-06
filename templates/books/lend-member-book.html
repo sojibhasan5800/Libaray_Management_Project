@@ -30,6 +30,12 @@
             </div>
 
             <div class="form-group">
+              {{ form.borrowing_fee.label_tag }}
+              {{ form.borrowing_fee }}
+              <div class="form-error">{{ form.borrowing_fee.errors }}</div>
+           </div>
+
+            <div class="form-group">
                 {{ form.fine.label_tag }}
                 {{ form.fine }}
                     <div class="form-error">{{ form.fine.errors }}</div>
@@ -44,6 +50,33 @@
             <button type="submit" class="btn btn-primary btn-md me-2">Issue</button>
             <a href="{% url 'members' %}" class="btn btn-light">Cancel</a>
           </form>
+
+          <script>
+            const bookFees = {
+              {% for book in form.fields.book.queryset %}
+                "{{ book.id }}": {{ book.borrowing_fee }},
+              {% endfor %}
+            };
+          
+            const bookSelect = document.querySelector('select[name="book"]');
+            const feeInput = document.querySelector('input[name="borrowing_fee"]');
+          
+            if (bookSelect && feeInput) {
+              bookSelect.addEventListener('change', function () {
+                let total = 0;
+                const selectedOptions = Array.from(this.selectedOptions);
+          
+                selectedOptions.forEach(option => {
+                  const bookId = option.value;
+                  const fee = parseFloat(bookFees[bookId] || 0);
+                  total += fee;
+                });
+          
+                feeInput.value = total.toFixed(2);
+              });
+            }
+          </script>
+          
         </div>
       </div>
     </div>
