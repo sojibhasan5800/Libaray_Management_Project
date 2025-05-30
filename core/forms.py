@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .constrans import CATEGORY_CHOICES, PAYMENT_METHOD_CHOICES
 from .models import Book, BorrowedBook, Member
+from django.forms import SelectMultiple
 
 class AddMemberForm(forms.ModelForm):
     name = forms.CharField(
@@ -72,10 +73,9 @@ class AddBookForm(forms.ModelForm):
 
 
 class LendBookForm(forms.ModelForm):
-    book = forms.MultipleChoiceField(
+    book = forms.ModelMultipleChoiceField(
         label="Book / Books",
         queryset=Book.objects.filter(quantity__gt=0),
-        empty_label=None,
         widget=forms.Select(
             attrs={"class": "form-control form-control-lg js-example-basic-multiple w-100", "multiple": "multiple"}
         ),
@@ -91,10 +91,6 @@ class LendBookForm(forms.ModelForm):
         widget=forms.DateInput(attrs={"class": "form-control form-control-lg", "type": "date", "id": "return-date"})
     )
 
-    borrowing_fee = forms.DecimalField(
-        required=False,
-        widget=forms.NumberInput(attrs={"class": "form-control form-control-lg", "readonly": "readonly"})
-    )
 
 
     fine = forms.DecimalField(
@@ -104,17 +100,16 @@ class LendBookForm(forms.ModelForm):
 
     class Meta:
         model = BorrowedBook
-        fields = ["book", "member", "return_date", "fine","borrowing_fee"]
+        fields = ["book", "member", "return_date", "fine"]
 
 
 
 class LendMemberBookForm(forms.ModelForm):
-    book = forms.ModelChoiceField(
+    books = forms.ModelMultipleChoiceField(
         queryset=Book.objects.filter(quantity__gt=0),
-        empty_label=None,
-        widget=forms.Select(
-            attrs={"class": "form-control form-control-lg js-example-basic-multiple w-100", "multiple": "multiple"}
-        ),
+        widget=SelectMultiple(attrs={
+            "class": "form-control form-control-lg js-example-basic-multiple w-100"
+        }),
     )
 
     return_date = forms.DateField(
@@ -125,15 +120,10 @@ class LendMemberBookForm(forms.ModelForm):
         widget=forms.NumberInput(attrs={"class": "form-control form-control-lg", "placeholder": "Enter Fine"})
     )
 
-    borrowing_fee = forms.DecimalField(
-        required=False,
-        widget=forms.NumberInput(attrs={"class": "form-control form-control-lg", "readonly": "readonly"})
-    )
-
 
     class Meta:
         model = BorrowedBook
-        fields = ["book", "return_date", "fine", "borrowing_fee"]
+        fields = ["books", "return_date", "fine"]
 
 
 
